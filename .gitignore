@@ -1,11 +1,12 @@
 /.phpunit.cache
 /node_modules
-/public/build
+# /public/build
 /public/hot
-/public/storage
+# /public/storage
 /storage/*.key
 /storage/pail
 /vendor
+.htaccess
 .env
 .env.backup
 .env.production

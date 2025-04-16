@@ -17,8 +17,23 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('nim')->nullable();
+            $table->string('phone')->nullable();
+            $table->text('address')->nullable();
+            $table->string('profile_photo_path')->nullable();
+            $table->enum('role', ['admin', 'executive', 'staff', 'member', 'guest'])->default('guest');
+            $table->unsignedBigInteger('department_id')->nullable();
+            $table->string('position')->nullable();
+            $table->date('join_date')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->boolean('signature_authority')->default(false);
+            $table->json('notification_preferences')->nullable();
+            $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();
+
+            $table->foreign('department_id')->references('id')->on('departments')
+                ->onDelete('set null')->onUpdate('cascade');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -35,6 +50,12 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
+
+        // Now link departments head_id to users
+        Schema::table('departments', function (Blueprint $table) {
+            $table->foreign('head_id')->references('id')->on('users')
+                ->onDelete('set null')->onUpdate('cascade');
+        });
     }
 
     /**
@@ -42,6 +63,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('departments', function (Blueprint $table) {
+            $table->dropForeign(['head_id']);
+        });
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
