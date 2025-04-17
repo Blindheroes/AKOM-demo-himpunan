@@ -17,7 +17,12 @@
 
         <!-- Navbar -->
         <nav class="bg-orange-500 text-white py-4 px-6 flex justify-end">
-            <a href="#" class="px-4 py-2 bg-white text-orange-500 rounded-lg hover:bg-orange-100 transition">Login</a>
+            @auth
+                <a href="{{ route('home') }}" class="px-4 py-2 bg-white text-orange-500 rounded-lg hover:bg-orange-100 transition">Home</a>
+                <a href="{{ route('logout') }}" class="px-4 py-2 bg-white text-orange-500 rounded-lg hover:bg-orange-100 transition">Logout</a>
+            @else
+                <a href="{{ route('google.redirect') }}" class="px-4 py-2 bg-white text-orange-500 rounded-lg hover:bg-orange-100 transition">Login</a>
+            @endauth
         </nav>
     
         <!-- Main Content -->
