@@ -11,13 +11,48 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class LpjResource extends Resource
 {
     protected static ?string $model = Lpj::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationLabel = 'Activity Reports';
+    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationGroup = 'Documentation';
+    protected static ?string $recordTitleAttribute = 'title';
+
+    // Add permission checks for viewing resource
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->can('view lpj');
+    }
+
+    public static function canCreate(): bool
+    {
+        return Auth::user()->can('create lpj');
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        // Users can edit their own LPJs or if they have update permission
+        return Auth::user()->can('update lpj') ||
+            Auth::id() === $record->created_by;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return Auth::user()->can('delete lpj');
+    }
+
+    // Permission to approve LPJs
+    public static function canApprove(Model $record): bool
+    {
+        return Auth::user()->can('approve lpj');
+    }
 
     public static function form(Form $form): Form
     {

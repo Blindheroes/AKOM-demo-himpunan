@@ -11,13 +11,45 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationLabel = 'Users';
+    protected static ?int $navigationSort = 1;
+
+    // Add strict permission checks for user management
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->can('view user');
+    }
+
+    public static function canCreate(): bool
+    {
+        // Only super-admins should create new users
+        return Auth::user()->can('create user');
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        // Users can edit their own profile or admins can edit any user
+        return Auth::user()->can('update user') ||
+            Auth::id() === $record->id;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        // Only users with delete user permission can delete users
+        // Also prevent users from deleting themselves
+        return Auth::user()->can('delete user') &&
+            Auth::id() !== $record->id;
+    }
 
     public static function form(Form $form): Form
     {
@@ -33,8 +65,9 @@ class UserResource extends Resource
                 Forms\Components\DateTimePicker::make('email_verified_at'),
                 Forms\Components\TextInput::make('password')
                     ->password()
-                    ->required()
-                    ->maxLength(255),
+                    ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                    ->dehydrated(fn($state) => filled($state))
+                    ->required(fn(string $context): bool => $context === 'create'),
                 Forms\Components\TextInput::make('nim')
                     ->maxLength(255)
                     ->default(null),
@@ -44,9 +77,14 @@ class UserResource extends Resource
                     ->default(null),
                 Forms\Components\Textarea::make('address')
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('profile_photo_path')
-                    ->maxLength(255)
-                    ->default(null),
+                Forms\Components\FileUpload::make('profile_photo_path')
+                    ->image()
+                    ->directory('profile-photos'),
+                Forms\Components\Select::make('roles')
+                    ->multiple()
+                    ->relationship('roles', 'name')
+                    ->preload()
+                    ->visible(fn() => Auth::user()->can('create user')),
                 Forms\Components\TextInput::make('role')
                     ->required(),
                 Forms\Components\Select::make('department_id')

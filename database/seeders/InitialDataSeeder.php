@@ -36,60 +36,60 @@ class InitialDataSeeder extends Seeder
         Storage::deleteDirectory('public/images');
         Storage::deleteDirectory('public/events');
         Storage::deleteDirectory('public/galleries');
-        
+
         // Recreate directories
         Storage::makeDirectory('public/signatures');
         Storage::makeDirectory('public/documents');
         Storage::makeDirectory('public/images');
         Storage::makeDirectory('public/events');
         Storage::makeDirectory('public/galleries');
-        
+
         // Create Users
         $this->createUsers();
-        
+
         // Create Departments
         $this->createDepartments();
-        
+
         // Assign Department Heads
         $this->assignDepartmentHeads();
-        
+
         // Create Signatures
         $this->createSignatures();
-        
+
         // Create Letter Templates
         $this->createLetterTemplates();
-        
+
         // Create Letter Number Formats
         $this->createLetterNumberFormats();
-        
+
         // Create Letters
         $this->createLetters();
-        
+
         // Create LPJ Templates
         $this->createLpjTemplates();
-        
+
         // Create Events
         $this->createEvents();
-        
+
         // Create Event Registrations
         $this->createEventRegistrations();
-        
+
         // Create LPJs
         $this->createLpjs();
-        
+
         // Create Financial Transactions
         $this->createFinancialTransactions();
-        
+
         // Create News
         $this->createNews();
-        
+
         // Create Documents
         $this->createDocuments();
-        
+
         // Create Galleries
         $this->createGalleries();
     }
-    
+
     private function createUsers()
     {
         // Admin User
@@ -103,7 +103,18 @@ class InitialDataSeeder extends Seeder
             'is_active' => true,
             'signature_authority' => true,
         ]);
-        
+        // Admin User
+        User::create([
+            'name' => 'Admin farhat',
+            'email' => 'farhat.fire@gmail.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('123123'),
+            'nim' => '000000000',
+            'role' => 'admin',
+            'is_active' => true,
+            'signature_authority' => true,
+        ]);
+
         // Executive Users (Chair, Vice Chair, Secretary, Treasurer)
         User::create([
             'name' => 'Chairperson',
@@ -115,7 +126,7 @@ class InitialDataSeeder extends Seeder
             'is_active' => true,
             'signature_authority' => true,
         ]);
-        
+
         User::create([
             'name' => 'Vice Chairperson',
             'email' => 'vicechair@himatekom.org',
@@ -126,7 +137,7 @@ class InitialDataSeeder extends Seeder
             'is_active' => true,
             'signature_authority' => true,
         ]);
-        
+
         User::create([
             'name' => 'Secretary',
             'email' => 'secretary@himatekom.org',
@@ -137,7 +148,7 @@ class InitialDataSeeder extends Seeder
             'is_active' => true,
             'signature_authority' => true,
         ]);
-        
+
         User::create([
             'name' => 'Treasurer',
             'email' => 'treasurer@himatekom.org',
@@ -148,7 +159,7 @@ class InitialDataSeeder extends Seeder
             'is_active' => true,
             'signature_authority' => true,
         ]);
-        
+
         // Staff Users (Department Heads)
         for ($i = 1; $i <= 5; $i++) {
             User::create([
@@ -162,7 +173,7 @@ class InitialDataSeeder extends Seeder
                 'signature_authority' => true,
             ]);
         }
-        
+
         // Regular Staff
         for ($i = 1; $i <= 10; $i++) {
             User::create([
@@ -176,7 +187,7 @@ class InitialDataSeeder extends Seeder
                 'signature_authority' => false,
             ]);
         }
-        
+
         // Members
         for ($i = 1; $i <= 20; $i++) {
             User::create([
@@ -191,7 +202,7 @@ class InitialDataSeeder extends Seeder
             ]);
         }
     }
-    
+
     private function createDepartments()
     {
         // Main Organization (Parent Department)
@@ -201,7 +212,7 @@ class InitialDataSeeder extends Seeder
             'description' => 'Himpunan Mahasiswa Teknik Komputer',
             'is_active' => true,
         ]);
-        
+
         // Child Departments
         $depts = [
             [
@@ -230,7 +241,7 @@ class InitialDataSeeder extends Seeder
                 'description' => 'Plans and executes organizational events and activities'
             ]
         ];
-        
+
         foreach ($depts as $index => $dept) {
             Department::create([
                 'name' => $dept['name'],
@@ -241,55 +252,55 @@ class InitialDataSeeder extends Seeder
             ]);
         }
     }
-    
+
     private function assignDepartmentHeads()
     {
         // Main organization heads
         $mainDept = Department::where('slug', 'himatekom')->first();
         $mainDept->head_id = User::where('email', 'chair@himatekom.org')->first()->id;
         $mainDept->save();
-        
+
         // Department heads
         $departments = Department::where('slug', '!=', 'himatekom')->get();
         $staffUsers = User::where('role', 'staff')
             ->where('email', 'like', 'dept%')
             ->get();
-        
+
         foreach ($departments as $index => $dept) {
             if (isset($staffUsers[$index])) {
                 $dept->head_id = $staffUsers[$index]->id;
                 $staffUsers[$index]->department_id = $dept->id;
-                
+
                 $dept->save();
                 $staffUsers[$index]->save();
             }
         }
-        
+
         // Assign regular staff to departments
         $regularStaff = User::where('role', 'staff')
             ->where('email', 'like', 'staff%')
             ->get();
-        
+
         foreach ($regularStaff as $index => $staff) {
             $deptIndex = $index % count($departments);
             $staff->department_id = $departments[$deptIndex]->id;
             $staff->save();
         }
-        
+
         // Assign members to departments randomly
         $members = User::where('role', 'member')->get();
-        
+
         foreach ($members as $member) {
             $randomDept = $departments->random();
             $member->department_id = $randomDept->id;
             $member->save();
         }
     }
-    
+
     private function createSignatures()
     {
         $signatoryUsers = User::where('signature_authority', true)->get();
-        
+
         foreach ($signatoryUsers as $user) {
             // For testing purposes, we'll just create placeholder entries
             // In a real scenario, you would store actual signature images
@@ -300,11 +311,11 @@ class InitialDataSeeder extends Seeder
             ]);
         }
     }
-    
+
     private function createLetterTemplates()
     {
         $admin = User::where('role', 'admin')->first();
-        
+
         $templates = [
             [
                 'name' => 'Official Invitation',
@@ -386,7 +397,7 @@ class InitialDataSeeder extends Seeder
                 ]),
             ],
         ];
-        
+
         foreach ($templates as $template) {
             LetterTemplate::create([
                 'name' => $template['name'],
@@ -400,11 +411,11 @@ class InitialDataSeeder extends Seeder
             ]);
         }
     }
-    
+
     private function createLetterNumberFormats()
     {
         $departments = Department::all();
-        
+
         foreach ($departments as $dept) {
             LetterNumberFormat::create([
                 'department_id' => $dept->id,
@@ -415,14 +426,14 @@ class InitialDataSeeder extends Seeder
             ]);
         }
     }
-    
+
     private function createLetters()
     {
         $templates = LetterTemplate::all();
         $mainDept = Department::where('slug', 'himatekom')->first();
         $chair = User::where('email', 'chair@himatekom.org')->first();
         $secretary = User::where('email', 'secretary@himatekom.org')->first();
-        
+
         $letters = [
             [
                 'title' => 'Invitation to Annual Meeting',
@@ -452,11 +463,11 @@ class InitialDataSeeder extends Seeder
                 'status' => 'sent',
             ],
         ];
-        
+
         foreach ($letters as $index => $letterData) {
             $template = $templates[$index % count($templates)];
             $date = now()->addDays($index * 5);
-            
+
             $letter = Letter::create([
                 'title' => $letterData['title'],
                 'template_id' => $template->id,
@@ -471,7 +482,7 @@ class InitialDataSeeder extends Seeder
                 'department_id' => $mainDept->id,
                 'created_by' => $secretary->id,
             ]);
-            
+
             if ($letterData['status'] === 'signed' || $letterData['status'] === 'sent') {
                 $letter->signed_by = $chair->id;
                 $letter->signing_date = $date;
@@ -479,11 +490,11 @@ class InitialDataSeeder extends Seeder
             }
         }
     }
-    
+
     private function createLpjTemplates()
     {
         $admin = User::where('role', 'admin')->first();
-        
+
         $templates = [
             [
                 'name' => 'General Event Report',
@@ -605,7 +616,7 @@ class InitialDataSeeder extends Seeder
                 ]),
             ],
         ];
-        
+
         foreach ($templates as $template) {
             LpjTemplate::create([
                 'name' => $template['name'],
@@ -617,15 +628,15 @@ class InitialDataSeeder extends Seeder
             ]);
         }
     }
-    
+
     private function createEvents()
     {
         $departments = Department::all();
         $organizer = User::where('role', 'executive')->first();
         $approver = User::where('email', 'chair@himatekom.org')->first();
-        
+
         $now = now();
-        
+
         $events = [
             [
                 'title' => 'Annual General Meeting',
@@ -698,10 +709,10 @@ class InitialDataSeeder extends Seeder
                 'budget' => 1000000,
             ],
         ];
-        
+
         foreach ($events as $index => $eventData) {
             $department = $departments[$index % count($departments)];
-            
+
             Event::create([
                 'title' => $eventData['title'],
                 'slug' => $eventData['slug'],
@@ -722,29 +733,29 @@ class InitialDataSeeder extends Seeder
             ]);
         }
     }
-    
+
     private function createEventRegistrations()
     {
         $events = Event::all();
         $members = User::where('role', 'member')->get();
-        
+
         foreach ($events as $event) {
             // Skip past events
             if ($event->status === 'completed') {
                 continue;
             }
-            
+
             // Register some members to each event
             $registerCount = min(rand(5, 15), $members->count());
             $registeredMembers = $members->random($registerCount);
-            
+
             foreach ($registeredMembers as $member) {
                 $registrationDate = now()->subDays(rand(1, 5));
-                
+
                 // Set different statuses for variety
                 $statuses = ['pending', 'approved', 'approved', 'approved'];
                 $status = $statuses[array_rand($statuses)];
-                
+
                 EventRegistration::create([
                     'event_id' => $event->id,
                     'user_id' => $member->id,
@@ -756,17 +767,17 @@ class InitialDataSeeder extends Seeder
             }
         }
     }
-    
+
     private function createLpjs()
     {
         $completedEvents = Event::where('status', 'completed')->get();
         $templates = LpjTemplate::all();
         $treasurer = User::where('email', 'treasurer@himatekom.org')->first();
         $chair = User::where('email', 'chair@himatekom.org')->first();
-        
+
         foreach ($completedEvents as $event) {
             $template = $templates->random();
-            
+
             // Create LPJ with template structure filled with sample data
             $lpj = new Lpj();
             $lpj->title = $event->title . ' - Event Report';
@@ -777,17 +788,17 @@ class InitialDataSeeder extends Seeder
             $lpj->created_by = $treasurer->id;
             $lpj->approved_by = $chair->id;
             $lpj->approval_date = now()->subDays(rand(1, 5));
-            
+
             // Create structured content based on template
             $templateStructure = json_decode($template->structure, true);
             $content = [];
-            
+
             foreach ($templateStructure['sections'] as $section) {
                 $sectionData = [];
-                
+
                 foreach ($section['fields'] as $field) {
                     $fieldName = $field['name'];
-                    
+
                     switch ($fieldName) {
                         case 'event_name':
                         case 'workshop_title':
@@ -838,15 +849,15 @@ class InitialDataSeeder extends Seeder
                             break;
                     }
                 }
-                
+
                 $content[$section['title']] = $sectionData;
             }
-            
+
             $lpj->content = json_encode($content);
             $lpj->save();
         }
     }
-    
+
     private function createFinancialTransactions()
     {
         $events = Event::all();
@@ -854,12 +865,12 @@ class InitialDataSeeder extends Seeder
         $departments = Department::all();
         $treasurer = User::where('email', 'treasurer@himatekom.org')->first();
         $chair = User::where('email', 'chair@himatekom.org')->first();
-        
+
         // Create income transactions for organization
         for ($i = 1; $i <= 5; $i++) {
             $department = $departments->random();
             $date = now()->subDays(rand(10, 90));
-            
+
             FinancialTransaction::create([
                 'transaction_date' => $date,
                 'amount' => rand(5, 20) * 1000000, // 5-20 million
@@ -872,7 +883,7 @@ class InitialDataSeeder extends Seeder
                 'approval_status' => 'approved',
             ]);
         }
-        
+
         // Create income transactions for events (sponsorships, ticket sales)
         foreach ($events as $event) {
             if (rand(0, 1) == 1) { // 50% chance to have sponsorship
@@ -889,7 +900,7 @@ class InitialDataSeeder extends Seeder
                     'approval_status' => 'approved',
                 ]);
             }
-            
+
             if ($event->max_participants > 0 && rand(0, 1) == 1) { // 50% chance to have ticket sales
                 FinancialTransaction::create([
                     'transaction_date' => $event->start_date->copy()->subDays(rand(1, 7)),
@@ -905,18 +916,18 @@ class InitialDataSeeder extends Seeder
                 ]);
             }
         }
-        
+
         // Create expense transactions for events
         foreach ($events as $event) {
             $categories = ['Venue Rental', 'Equipment', 'Catering', 'Promotional Materials', 'Speaker Honorarium', 'Transportation'];
             $numTransactions = rand(3, 6); // 3-6 expense categories per event
-            
+
             for ($i = 0; $i < $numTransactions; $i++) {
                 $category = $categories[array_rand($categories)];
-                $transactionDate = $event->status === 'completed' 
-                    ? $event->start_date->copy()->subDays(rand(1, 7)) 
+                $transactionDate = $event->status === 'completed'
+                    ? $event->start_date->copy()->subDays(rand(1, 7))
                     : now()->subDays(rand(1, 10));
-                
+
                 $lpjId = null;
                 if ($event->status === 'completed') {
                     $eventLpj = $lpjs->where('event_id', $event->id)->first();
@@ -924,7 +935,7 @@ class InitialDataSeeder extends Seeder
                         $lpjId = $eventLpj->id;
                     }
                 }
-                
+
                 FinancialTransaction::create([
                     'transaction_date' => $transactionDate,
                     'amount' => rand(5, 30) * 100000, // 500k - 3 million
@@ -940,15 +951,15 @@ class InitialDataSeeder extends Seeder
                 ]);
             }
         }
-        
+
         // Create general organizational expenses
         $categories = ['Office Supplies', 'Equipment Maintenance', 'Software Subscriptions', 'Membership Activities', 'Training Materials'];
-        
+
         for ($i = 1; $i <= 10; $i++) {
             $department = $departments->random();
             $category = $categories[array_rand($categories)];
             $date = now()->subDays(rand(1, 90));
-            
+
             FinancialTransaction::create([
                 'transaction_date' => $date,
                 'amount' => rand(1, 10) * 100000, // 100k - 1 million
@@ -962,12 +973,12 @@ class InitialDataSeeder extends Seeder
             ]);
         }
     }
-    
+
     private function createNews()
     {
         $departments = Department::all();
         $authors = User::where('role', 'staff')->orWhere('role', 'executive')->get();
-        
+
         $newsItems = [
             [
                 'title' => 'HIMATEKOM Successfully Hosts Annual Tech Exhibition',
@@ -1065,12 +1076,12 @@ HIMATEKOM will organize a celebratory event to honor the winning team and share 
                 'is_featured' => true,
             ],
         ];
-        
+
         foreach ($newsItems as $index => $newsData) {
             $department = $departments->random();
             $author = $authors->random();
             $publishedDate = now()->subDays(rand(1, 30));
-            
+
             News::create([
                 'title' => $newsData['title'],
                 'slug' => Str::slug($newsData['title']),
@@ -1085,17 +1096,17 @@ HIMATEKOM will organize a celebratory event to honor the winning team and share 
             ]);
         }
     }
-    
+
     private function createDocuments()
     {
         $departments = Department::all();
         $uploaders = User::where('role', 'staff')->orWhere('role', 'executive')->get();
         $approvers = User::where('signature_authority', true)->get();
-        
+
         $categories = ['report', 'proposal', 'minutes', 'regulation', 'certificate', 'other'];
         $statuses = ['draft', 'pending', 'approved', 'published'];
         $visibilities = ['public', 'members', 'executives', 'admin'];
-        
+
         for ($i = 1; $i <= 15; $i++) {
             $department = $departments->random();
             $uploader = $uploaders->random();
@@ -1103,7 +1114,7 @@ HIMATEKOM will organize a celebratory event to honor the winning team and share 
             $category = $categories[array_rand($categories)];
             $status = $statuses[array_rand($statuses)];
             $visibility = $visibilities[array_rand($visibilities)];
-            
+
             $title = '';
             switch ($category) {
                 case 'report':
@@ -1124,7 +1135,7 @@ HIMATEKOM will organize a celebratory event to honor the winning team and share 
                 default:
                     $title = 'Document ' . $i . ': General Information';
             }
-            
+
             Document::create([
                 'title' => $title,
                 'description' => 'Sample document for testing purposes: ' . $title,
@@ -1142,15 +1153,15 @@ HIMATEKOM will organize a celebratory event to honor the winning team and share 
             ]);
         }
     }
-    
+
     private function createGalleries()
     {
         $events = Event::where('status', 'completed')->get();
         $creators = User::where('role', 'staff')->orWhere('role', 'executive')->get();
-        
+
         foreach ($events as $event) {
             $creator = $creators->random();
-            
+
             $gallery = Gallery::create([
                 'title' => 'Gallery: ' . $event->title,
                 'description' => 'Photo documentation of ' . $event->title,
@@ -1159,7 +1170,7 @@ HIMATEKOM will organize a celebratory event to honor the winning team and share 
                 'status' => 'published',
                 'created_by' => $creator->id,
             ]);
-            
+
             // Create some gallery images
             $imageCount = rand(5, 15);
             for ($i = 1; $i <= $imageCount; $i++) {

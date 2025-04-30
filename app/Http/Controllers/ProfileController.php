@@ -8,15 +8,17 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ProfileController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display the user's profile.
      */
     public function show()
     {
-        $user = Auth::user();
+        $user = User::find(Auth::id());
         return view('profile.show', compact('user'));
     }
 

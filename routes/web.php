@@ -18,6 +18,9 @@ Route::get('/', function () {
 })->name('landingpage');
 
 // Authentication routes
+Route::get('/login', function () {
+    return redirect()->route('google.redirect');
+})->name('login');
 Route::get('/google/redirect', [GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
 Route::get('/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 Route::get('/logout', [GoogleController::class, 'logout'])->name('logout');

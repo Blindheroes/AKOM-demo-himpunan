@@ -10,9 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\GalleryRequest;
 use App\Services\FileUploadService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class GalleryController extends Controller
 {
+    use AuthorizesRequests;
     protected $fileUploadService;
 
     public function __construct(FileUploadService $fileUploadService)

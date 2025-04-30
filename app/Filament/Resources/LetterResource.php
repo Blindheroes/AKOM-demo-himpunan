@@ -11,13 +11,47 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class LetterResource extends Resource
 {
     protected static ?string $model = Letter::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-envelope';
+    protected static ?string $navigationLabel = 'Letters';
+    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationGroup = 'Documentation';
+
+    // Add permission checks for viewing resource
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->can('view letter');
+    }
+
+    public static function canCreate(): bool
+    {
+        return Auth::user()->can('create letter');
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        // Users can edit their own letters or if they have update permission
+        return Auth::user()->can('update letter') ||
+            Auth::id() === $record->created_by;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return Auth::user()->can('delete letter');
+    }
+
+    // Permission to approve letters
+    public static function canApprove(Model $record): bool
+    {
+        return Auth::user()->can('approve letter');
+    }
 
     public static function form(Form $form): Form
     {

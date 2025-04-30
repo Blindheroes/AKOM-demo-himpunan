@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use App\Models\Department;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\DocumentRequest;
 use App\Services\FileUploadService;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\DocumentRequest;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class DocumentController extends Controller
 {
+    use AuthorizesRequests;
     protected $fileUploadService;
 
     public function __construct(FileUploadService $fileUploadService)

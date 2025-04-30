@@ -11,13 +11,47 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class EventResource extends Resource
 {
     protected static ?string $model = Event::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-calendar';
+    protected static ?string $navigationLabel = 'Events';
+    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationGroup = 'Activities';
+
+    // Add permission checks for viewing resource
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->can('view event');
+    }
+
+    public static function canCreate(): bool
+    {
+        return Auth::user()->can('create event');
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        // Users can edit their own events or if they have update permission
+        return Auth::user()->can('update event') ||
+            Auth::id() === $record->created_by;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return Auth::user()->can('delete event');
+    }
+
+    // Permission to approve events
+    public static function canApprove(Model $record): bool
+    {
+        return Auth::user()->can('approve event');
+    }
 
     public static function form(Form $form): Form
     {

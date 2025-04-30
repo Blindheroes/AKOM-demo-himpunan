@@ -11,13 +11,39 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class DepartmentResource extends Resource
 {
     protected static ?string $model = Department::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office';
+    protected static ?string $navigationLabel = 'Departments';
+    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationGroup = 'Organization';
+
+    // Add permission checks for viewing resource
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->can('view department');
+    }
+
+    public static function canCreate(): bool
+    {
+        return Auth::user()->can('create department');
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return Auth::user()->can('update department');
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return Auth::user()->can('delete department');
+    }
 
     public static function form(Form $form): Form
     {
