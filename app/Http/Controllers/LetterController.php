@@ -28,13 +28,26 @@ class LetterController extends Controller
     {
         $query = Letter::query();
 
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('letter_number', 'like', "%{$search}%")
+                    ->orWhere('regarding', 'like', "%{$search}%")
+                    ->orWhere('recipient', 'like', "%{$search}%")
+                    ->orWhere('recipient_institution', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
         // Filter by department if specified
-        if ($request->has('department')) {
+        if ($request->filled('department')) {
             $query->where('department_id', $request->department);
         }
 
         // Filter by status if specified
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 

@@ -19,7 +19,7 @@
         <!-- Header/Navbar -->
         <nav class="bg-orange-500 text-white py-4 px-6 flex justify-between items-center shadow-md">
             <div class="flex items-center space-x-2">
-                <img src="/logo.png" alt="Logo" class="h-8 w-auto" onerror="this.src='https://via.placeholder.com/32x32?text=H'">
+                {{-- <img src="/logo.png" alt="Logo" class="h-8 w-auto" onerror="this.src='https://via.placeholder.com/32x32?text=H'"> --}}
                 <span class="font-bold text-lg">HIMATEKOM</span>
             </div>
             <div class="flex items-center space-x-4">
@@ -46,7 +46,7 @@
             <div class="bg-gradient-to-r from-orange-600 to-orange-500 h-96 flex items-center justify-center text-white text-center">
                 <div class="absolute inset-0 bg-black opacity-20"></div>
                 <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <img src="/logo.png" alt="HIMATEKOM Logo" class="w-24 h-24 mx-auto mb-6" onerror="this.src='https://via.placeholder.com/96x96?text=HIMATEKOM'">
+                    {{-- <img src="/logo.png" alt="HIMATEKOM Logo" class="w-24 h-24 mx-auto mb-6" onerror="this.src='https://via.placeholder.com/96x96?text=HIMATEKOM'"> --}}
                     <h1 class="text-4xl sm:text-5xl font-bold mb-4">Welcome to HIMATEKOM</h1>
                     <p class="text-xl sm:text-2xl max-w-3xl mx-auto">Himpunan Mahasiswa Teknik Komputer - Computer Engineering Student Association</p>
                     <div class="mt-8">

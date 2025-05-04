@@ -1,66 +1,189 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<p align="center"><img src="https://via.placeholder.com/150x150?text=HIMATEKOM" width="150" alt="HIMATEKOM Logo"></p>
 
 <p align="center">
 <a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+# AKOM-demo-himpunan - Computer Engineering Student Association Management System
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+AKOM-demo-himpunan is a comprehensive organization management system designed specifically for HIMATEKOM (Himpunan Mahasiswa Teknik Komputer - Computer Engineering Student Association). This web application streamlines administrative tasks, event management, documentation, and communication within the student organization.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Features
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+The system includes the following key features:
 
-## Laravel Sponsors
+### User Management
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+-   Role-based access control (admin, executive, staff, member)
+-   User profiles with department assignments
+-   Digital signature capabilities for authorized users
 
-### Premium Partners
+### Event Management
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+-   Create and publish events
+-   Track registrations and attendance
+-   Event status workflow (draft, pending, approved, published)
+-   Post-event reporting (LPJ - Laporan Pertanggung Jawaban)
+
+### Document Management
+
+-   Official letters with templates
+-   Document repository with categorization
+-   Permission-based access to sensitive documents
+-   Version control and approval workflows
+
+### Financial Management
+
+-   Track organizational budget and expenses
+-   Financial transaction records
+-   Financial reporting capabilities
+
+### Communication Tools
+
+-   News publication system
+-   Photo galleries for event documentation
+-   Member notifications and updates
+
+### Administrative Tools
+
+-   Department management
+-   Admin dashboard with key metrics
+-   Report generation and templates
+
+## Technology Stack
+
+-   **Framework**: Laravel 12
+-   **Frontend**: Blade templates, Tailwind CSS
+-   **Admin Panel**: Filament
+-   **Authorization**: Spatie Laravel Permission
+-   **Database**: MySQL
+-   **Authentication**: Laravel Sanctum
+
+## Installation
+
+### Prerequisites
+
+-   PHP >= 8.2
+-   Composer
+-   MySQL
+-   Node.js & NPM
+
+### Setup Instructions
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/your-username/AKOM-demo-himpunan.git
+cd AKOM-demo-himpunan
+```
+
+2. Install PHP dependencies:
+
+```bash
+composer install
+```
+
+3. Install frontend dependencies:
+
+```bash
+npm install
+```
+
+4. Create and configure .env file:
+
+```bash
+cp .env.example .env
+```
+
+Update the .env file with your database credentials
+
+5. Generate application key:
+
+```bash
+php artisan key:generate
+```
+
+6. Run migrations and seed the database:
+
+```bash
+php artisan migrate
+php artisan db:seed
+```
+
+7. Build frontend assets:
+
+```bash
+npm run build
+```
+
+8. Create storage link:
+
+```bash
+php artisan storage:link
+```
+
+9. Start the development server:
+
+```bash
+php artisan serve
+```
+
+## Default Users
+
+After seeding, the following test users are available:
+
+-   **Admin**: admin@himatekom.org | password: password
+-   **Chairperson**: chair@himatekom.org | password: password
+-   **Secretary**: secretary@himatekom.org | password: password
+-   **Treasurer**: treasurer@himatekom.org | password: password
+-   **Member**: member1@himatekom.org | password: password
+
+## Modules
+
+### Dashboard
+
+The dashboard provides a quick overview of the organization's activities, upcoming events, pending documents, and recent news.
+
+### Events
+
+Manage organization events including workshops, meetings, competitions, and community service activities.
+
+### LPJ (Activity Reports)
+
+Create and manage post-event reports with customizable templates and approval workflows.
+
+### Letters
+
+Generate and track official organization letters with proper numbering and digital signatures.
+
+### Documents
+
+Store and organize organizational documents with proper categorization and access control.
+
+### Galleries
+
+Manage photos and media from various organization events and activities.
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Contributions to the AKOM-demo-himpunan project are welcome. Please follow these steps:
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Credits
+
+AKOM-demo-himpunan is powered by Laravel and built for HIMATEKOM to improve organizational efficiency and management.

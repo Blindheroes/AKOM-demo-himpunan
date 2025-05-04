@@ -1,6 +1,6 @@
 <!-- resources/views/components/layouts/app.blade.php -->
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,13 +12,10 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
-    <!-- Styles -->
-    @vite('resources/css/app.css')
-
-    <!-- Scripts -->
-    @vite('resources/js/app.js')
+    <!-- Scripts and Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased bg-gray-100 flex flex-col min-h-screen">
     <!-- Header -->
     <header class="bg-orange-500 shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,7 +24,7 @@
                     <!-- Logo -->
                     <div class="flex-shrink-0 flex items-center">
                         <a href="{{ route('dashboard') }}">
-                            <img class="h-10 w-auto" src="/logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/40x40?text=H'">
+                            {{-- <img class="h-10 w-auto" src="/logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/40x40?text=H'"> --}}
                         </a>
                         <a href="{{ route('dashboard') }}" class="ml-2 text-white font-bold text-xl">HIMATEKOM</a>
                     </div>
@@ -46,18 +43,16 @@
                         <a href="{{ route('galleries.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('galleries.*') ? 'border-white text-white' : 'border-transparent text-orange-100 hover:text-white hover:border-orange-300' }} text-sm font-medium">
                             Gallery
                         </a>
-                        @if(auth()->check() && in_array(auth()->user()->role, ['staff', 'executive', 'admin']))
                         <a href="{{ route('documents.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('documents.*') ? 'border-white text-white' : 'border-transparent text-orange-100 hover:text-white hover:border-orange-300' }} text-sm font-medium">
                             Documents
                         </a>
                         <a href="{{ route('letters.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('letters.*') ? 'border-white text-white' : 'border-transparent text-orange-100 hover:text-white hover:border-orange-300' }} text-sm font-medium">
                             Letters
                         </a>
-                        @if(in_array(auth()->user()->role, ['executive', 'admin']))
+                        @if(auth()->check() && in_array(auth()->user()->role, ['executive', 'admin']))
                         <a href="{{ route('lpjs.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('lpjs.*') ? 'border-white text-white' : 'border-transparent text-orange-100 hover:text-white hover:border-orange-300' }} text-sm font-medium">
                             LPJs
                         </a>
-                        @endif
                         @endif
                     </div>
                 </div>
@@ -126,12 +121,10 @@
                 <a href="{{ route('events.index') }}" class="block pl-3 pr-4 py-2 {{ request()->routeIs('events.*') ? 'text-white bg-orange-600' : 'text-orange-100 hover:text-white hover:bg-orange-600' }} text-base font-medium">Events</a>
                 <a href="{{ route('news.index') }}" class="block pl-3 pr-4 py-2 {{ request()->routeIs('news.*') ? 'text-white bg-orange-600' : 'text-orange-100 hover:text-white hover:bg-orange-600' }} text-base font-medium">News</a>
                 <a href="{{ route('galleries.index') }}" class="block pl-3 pr-4 py-2 {{ request()->routeIs('galleries.*') ? 'text-white bg-orange-600' : 'text-orange-100 hover:text-white hover:bg-orange-600' }} text-base font-medium">Gallery</a>
-                @if(auth()->check() && in_array(auth()->user()->role, ['staff', 'executive', 'admin']))
                 <a href="{{ route('documents.index') }}" class="block pl-3 pr-4 py-2 {{ request()->routeIs('documents.*') ? 'text-white bg-orange-600' : 'text-orange-100 hover:text-white hover:bg-orange-600' }} text-base font-medium">Documents</a>
                 <a href="{{ route('letters.index') }}" class="block pl-3 pr-4 py-2 {{ request()->routeIs('letters.*') ? 'text-white bg-orange-600' : 'text-orange-100 hover:text-white hover:bg-orange-600' }} text-base font-medium">Letters</a>
-                @if(in_array(auth()->user()->role, ['executive', 'admin']))
+                @if(auth()->check() && in_array(auth()->user()->role, ['executive', 'admin']))
                 <a href="{{ route('lpjs.index') }}" class="block pl-3 pr-4 py-2 {{ request()->routeIs('lpjs.*') ? 'text-white bg-orange-600' : 'text-orange-100 hover:text-white hover:bg-orange-600' }} text-base font-medium">LPJs</a>
-                @endif
                 @endif
             </div>
             
@@ -183,7 +176,7 @@
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <span class="block sm:inline">{{ session('error') }}</span>
             <button type="button" class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.style.display='none'">
-                <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1-1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
             </button>
         </div>
     </div>
@@ -194,14 +187,14 @@
         <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative" role="alert">
             <span class="block sm:inline">{{ session('info') }}</span>
             <button type="button" class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.style.display='none'">
-                <svg class="fill-current h-6 w-6 text-blue-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                <svg class="fill-current h-6 w-6 text-blue-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1-1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
             </button>
         </div>
     </div>
     @endif
 
     <!-- Page Content -->
-    <main>
+    <main class="flex-grow">
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 {{ $slot }}
@@ -210,7 +203,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-6 mt-12">
+    <footer class="bg-gray-800 text-white py-6 mt-auto">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-4 md:mb-0">
@@ -222,6 +215,8 @@
                     <a href="{{ route('events.index') }}" class="hover:text-orange-500 transition">Events</a>
                     <a href="{{ route('news.index') }}" class="hover:text-orange-500 transition">News</a>
                     <a href="{{ route('galleries.index') }}" class="hover:text-orange-500 transition">Gallery</a>
+                    <a href="{{ route('documents.index') }}" class="hover:text-orange-500 transition">Documents</a>
+                    <a href="{{ route('letters.index') }}" class="hover:text-orange-500 transition">Letters</a>
                 </div>
             </div>
             <div class="mt-4 text-center text-gray-400 text-sm">

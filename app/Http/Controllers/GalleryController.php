@@ -25,9 +25,28 @@ class GalleryController extends Controller
     /**
      * Display a listing of galleries.
      */
-    public function index()
+    public function index(Request $request)
     {
         $query = Gallery::query();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by event if specified
+        if ($request->filled('event')) {
+            $query->where('event_id', $request->event);
+        }
+
+        // Filter for featured galleries only
+        if ($request->filled('featured')) {
+            $query->where('is_featured', true);
+        }
 
         // Show only published galleries to regular users
         if (!Auth::check() || (Auth::check() && Auth::user()->role === 'member')) {
@@ -36,7 +55,10 @@ class GalleryController extends Controller
 
         $galleries = $query->orderBy('created_at', 'desc')->paginate(12);
 
-        return view('galleries.index', compact('galleries'));
+        // Get events for filter dropdown
+        $events = Event::where('status', 'completed')->get();
+
+        return view('galleries.index', compact('galleries', 'events'));
     }
 
     /**

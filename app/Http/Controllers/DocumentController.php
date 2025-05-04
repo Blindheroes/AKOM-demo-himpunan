@@ -29,13 +29,26 @@ class DocumentController extends Controller
     {
         $query = Document::query();
 
-        // Apply filters
-        if ($request->has('department')) {
-            $query->where('department_id', $request->department);
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
         }
 
-        if ($request->has('category')) {
+        // Apply filters
+        if ($request->filled('category')) {
             $query->where('category', $request->category);
+        }
+
+        if ($request->filled('visibility')) {
+            $query->where('visibility', $request->visibility);
+        }
+
+        if ($request->filled('status') && Auth::check() && in_array(Auth::user()->role, ['admin', 'executive'])) {
+            $query->where('status', $request->status);
         }
 
         // Apply visibility restrictions based on user role
@@ -256,9 +269,17 @@ class DocumentController extends Controller
         // Authorize the request
         $this->authorize('delete', $document);
 
-        // Delete the document file
+        // Delete the document file - handle the 'public/' prefix in the path
         if ($document->file_path) {
-            Storage::delete($document->file_path);
+            // Check if the file_path already includes 'public/' prefix
+            if (strpos($document->file_path, 'public/') === 0) {
+                // Remove the 'public/' prefix when passing to Storage::disk('public')
+                $path = str_replace('public/', '', $document->file_path);
+                Storage::disk('public')->delete($path);
+            } else {
+                // If no prefix, delete as is
+                Storage::disk('public')->delete($document->file_path);
+            }
         }
 
         $document->delete();
@@ -275,13 +296,25 @@ class DocumentController extends Controller
         // Authorize the request
         $this->authorize('view', $document);
 
+        // Handle the 'public/' prefix in the file path
+        $filePath = $document->file_path;
+        $storageFilePath = $filePath;
+
+        // If the path starts with 'public/', remove it for disk operations
+        if (strpos($filePath, 'public/') === 0) {
+            $storageFilePath = str_replace('public/', '', $filePath);
+        }
+
         // Check if file exists
-        if (!$document->file_path || !Storage::exists($document->file_path)) {
+        if (!$filePath || !Storage::disk('public')->exists($storageFilePath)) {
             return redirect()->route('documents.show', $document)
                 ->with('error', 'Document file not found.');
         }
 
-        return Storage::download($document->file_path, $document->title . '.' . pathinfo($document->file_path, PATHINFO_EXTENSION));
+        return Storage::disk('public')->download(
+            $storageFilePath,
+            $document->title . '.' . pathinfo($filePath, PATHINFO_EXTENSION)
+        );
     }
 
     /**

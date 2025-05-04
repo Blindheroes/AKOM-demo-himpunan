@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Event;
 use App\Models\Department;
 use Illuminate\Support\Str;
@@ -34,13 +35,55 @@ class EventController extends Controller
     {
         $query = Event::query();
 
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+
         // Apply filters
-        if ($request->has('department')) {
+        if ($request->filled('department')) {
             $query->where('department_id', $request->department);
         }
 
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        // Date filter
+        if ($request->filled('date_filter')) {
+            switch ($request->date_filter) {
+                case 'upcoming':
+                    $query->where('start_date', '>', now());
+                    break;
+                case 'past':
+                    $query->where('start_date', '<', now());
+                    break;
+                case 'this_week':
+                    $query->whereBetween('start_date', [
+                        now()->startOfWeek(),
+                        now()->endOfWeek()
+                    ]);
+                    break;
+                case 'this_month':
+                    $query->whereBetween('start_date', [
+                        now()->startOfMonth(),
+                        now()->endOfMonth()
+                    ]);
+                    break;
+            }
+        }
+
+        // Created by filter (for staff and admins)
+        if (Auth::check() && in_array(Auth::user()->role, ['staff', 'executive', 'admin']) && $request->filled('created_by')) {
+            if ($request->created_by == 'me') {
+                $query->where('created_by', Auth::id());
+            }
         }
 
         // Show only published events to regular users
@@ -48,7 +91,11 @@ class EventController extends Controller
             $query->where('status', 'published');
         }
 
-        $events = $query->orderBy('start_date', 'desc')->paginate(10);
+        // Order by date, with featured events first
+        $events = $query->orderBy('is_featured', 'desc')
+            ->orderBy('start_date', 'desc')
+            ->paginate(10);
+
         $departments = Department::all();
 
         return view('events.index', compact('events', 'departments'));
@@ -59,8 +106,12 @@ class EventController extends Controller
      */
     public function create()
     {
+
+        // get all user exept member
+        $users = User::where('role', '!=', 'member')->get();
+
         $departments = Department::all();
-        return view('events.create', compact('departments'));
+        return view('events.create', compact('departments', 'users'));
     }
 
     /**

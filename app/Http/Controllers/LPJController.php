@@ -21,14 +21,25 @@ class LPJController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Lpj::query();
+        $query = Lpj::query()->with(['event', 'creator']); // Eager load relationships
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhereHas('event', function ($q2) use ($search) {
+                        $q2->where('title', 'like', "%{$search}%");
+                    });
+            });
+        }
 
         // Apply filters if any
-        if ($request->has('event')) {
+        if ($request->filled('event')) {
             $query->where('event_id', $request->event);
         }
 
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
@@ -42,9 +53,12 @@ class LPJController extends Controller
             });
         }
 
-        $lpjs = $query->orderBy('created_at', 'desc')->paginate(15);
+        $lpjs = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
-        return view('lpjs.index', compact('lpjs'));
+        // Get events for the filter dropdown
+        $events = ModelsEvent::where('status', 'completed')->get();
+
+        return view('lpjs.index', compact('lpjs', 'events'));
     }
 
     /**
@@ -65,10 +79,73 @@ class LPJController extends Controller
         $lpj->event_id = $event->id;
         $lpj->template_id = $template->id;
         $lpj->content = $template->structure; // Empty structure
-        $lpj->created_by = auth()->id();
+        $lpj->created_by = Auth::id();
         $lpj->save();
 
         return redirect()->route('lpjs.edit', $lpj);
+    }
+
+    /**
+     * Show form to select a template for LPJ creation after selecting an event.
+     */
+    public function selectEventTemplate(Request $request)
+    {
+        // Validate the event ID
+        $validated = $request->validate([
+            'event' => 'required|exists:events,id'
+        ]);
+
+        $event = ModelsEvent::findOrFail($request->event);
+
+        // Make sure event has ended
+        if ($event->end_date > now()) {
+            return redirect()->route('lpjs.index')
+                ->with('error', 'Event belum selesai. LPJ hanya dapat dibuat untuk event yang sudah selesai.');
+        }
+
+        // Get all active LPJ templates
+        $templates = LpjTemplate::where('is_active', true)->get();
+
+        if ($templates->isEmpty()) {
+            return redirect()->route('lpjs.index')
+                ->with('error', 'No active LPJ templates available. Please contact an administrator.');
+        }
+
+        return view('lpjs.select-template', compact('event', 'templates'));
+    }
+
+    /**
+     * Create an LPJ using the specified event and template.
+     */
+    public function storeWithTemplate(Request $request)
+    {
+        $validated = $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'template_id' => 'required|exists:lpj_templates,id'
+        ]);
+
+        $event = ModelsEvent::findOrFail($validated['event_id']);
+        $template = LpjTemplate::findOrFail($validated['template_id']);
+
+        // Check if a LPJ for this event already exists
+        $existingLpj = Lpj::where('event_id', $event->id)->first();
+        if ($existingLpj) {
+            return redirect()->route('lpjs.edit', $existingLpj)
+                ->with('info', 'An LPJ for this event already exists. You can edit it here.');
+        }
+
+        // Create LPJ with template structure
+        $lpj = new Lpj();
+        $lpj->title = $event->title . ' - LPJ';
+        $lpj->event_id = $event->id;
+        $lpj->template_id = $template->id;
+        $lpj->content = $template->structure;
+        $lpj->status = 'draft';
+        $lpj->created_by = Auth::id();
+        $lpj->save();
+
+        return redirect()->route('lpjs.edit', $lpj)
+            ->with('success', 'LPJ created successfully. You can now edit the content.');
     }
 
     /**
@@ -112,7 +189,7 @@ class LPJController extends Controller
 
         $validated = $request->validate([
             'content' => 'required|array',
-            'status' => 'sometimes|in:draft,submitted'
+            'status' => 'sometimes|in:draft,pending'
         ]);
 
         $lpj->content = $validated['content'];
@@ -121,8 +198,8 @@ class LPJController extends Controller
         if (isset($validated['status'])) {
             $lpj->status = $validated['status'];
 
-            // Set submission date if status changed to submitted
-            if ($validated['status'] === 'submitted') {
+            // Set submission date if status changed to pending
+            if ($validated['status'] === 'pending') {
                 $lpj->submitted_at = now();
             }
         }
@@ -175,10 +252,10 @@ class LPJController extends Controller
     {
         $this->authorize('approve', $lpj);
 
-        // Only submitted LPJs can be approved
-        if ($lpj->status !== 'submitted') {
+        // Only pending LPJs can be approved
+        if ($lpj->status !== 'pending') {
             return redirect()->route('lpjs.show', $lpj)
-                ->with('error', 'Only submitted LPJs can be approved.');
+                ->with('error', 'Only pending LPJs can be approved.');
         }
 
         $lpj->status = 'approved';
@@ -198,10 +275,10 @@ class LPJController extends Controller
     {
         $this->authorize('approve', $lpj);
 
-        // Only submitted LPJs can be rejected
-        if ($lpj->status !== 'submitted') {
+        // Only pending LPJs can be rejected
+        if ($lpj->status !== 'pending') {
             return redirect()->route('lpjs.show', $lpj)
-                ->with('error', 'Only submitted LPJs can be rejected.');
+                ->with('error', 'Only pending LPJs can be rejected.');
         }
 
         $validated = $request->validate([
